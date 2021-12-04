@@ -1,0 +1,8 @@
+.godot
+.import
+*.exe
+*.pck
+export_presets.cfg
+
+__pycache__
+venv
