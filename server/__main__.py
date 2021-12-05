@@ -1,9 +1,22 @@
-import packet
-from typing import Set
+# Required for importing the server app (upper dir)
+import sys
+import pathlib
+file = pathlib.Path(__file__).resolve()
+root = file.parents[1]
+sys.path.append(str(root))
+
+from server import manage
+from server import models
+from server import packet
+
+from typing import Set, Optional
 from autobahn.twisted.websocket import WebSocketServerProtocol, WebSocketServerFactory
 
-
 class MyServerProtocol(WebSocketServerProtocol):
+    def __init__(self):
+        self.username: Optional[str] = None
+        super().__init__()
+
     def onConnect(self, request):
         print(f"Client connecting: {request.peer}")
 
@@ -24,14 +37,33 @@ class MyServerProtocol(WebSocketServerProtocol):
             return
 
         if p.action == packet.Action.Chat:
-            # Chat back to everyone verbatim
-            self.broadcast(p)
+            message: str = p.payloads[0]
+            if len(message) > 0:
+                new_message: str = f"{self.username} says: '{message}'"
+                self.broadcast(packet.ChatPacket(new_message))
+
+        elif p.action == packet.Action.Login:
+            username, password = p.payloads
+            if models.User.objects.filter(username=username, password=password).exists():
+                self.send_client(packet.OKPacket())
+                self.username = username
+                self.broadcast(packet.ChatPacket(f"{self.username} has joined."))
+            else:
+                self.send_client(packet.DenyPacket())
+
+        elif p.action == packet.Action.Register:
+            username, password = p.payloads
+            if models.User.objects.filter(username=username).exists():
+                self.send_client(packet.DenyPacket())
+            else:
+                models.User(username=username, password=password).save()
+                self.send_client(packet.OKPacket())
+            
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
-        message: str = f"WebSocket connection closed{' unexpectedly' if not wasClean else ' cleanly'} with code {code}: {reason}"
-        print(message)
-        self.broadcast(packet.ChatPacket(message))
+        print(f"{self.username}'s connection closed{' unexpectedly' if not wasClean else ' cleanly'} with code {code}: {reason}")
+        self.broadcast(packet.ChatPacket(f"{self.username} has left."))
 
     def send_client(self, p: packet.Packet):
         b: bytes = bytes(p)

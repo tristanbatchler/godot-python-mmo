@@ -4,7 +4,11 @@ from json_type import *
 
 
 class Action(enum.Enum):
+    OK = enum.auto()
+    Deny = enum.auto()
     Chat = enum.auto()
+    Login = enum.auto()
+    Register = enum.auto()
 
 
 class Packet:
@@ -25,11 +29,25 @@ class Packet:
     def __repr__(self) -> str:
         return str(self)
 
+class OKPacket(Packet):
+    def __init__(self):
+        super().__init__(Action.OK)
+
+class DenyPacket(Packet):
+    def __init__(self):
+        super().__init__(Action.Deny)
 
 class ChatPacket(Packet):
     def __init__(self, message: str):
         super().__init__(Action.Chat, message[:80])
 
+class LoginPacket(Packet):
+    def __init__(self, username: str, password: str):
+        super().__init__(Action.Login, username, password)
+
+class RegisterPacket(Packet):
+    def __init__(self, username: str, password: str):
+        super().__init__(Action.Registerz, username, password)
 
 def from_json(json_str: str) -> Packet:
     obj_dict: Dict[str, str] = json.loads(json_str)

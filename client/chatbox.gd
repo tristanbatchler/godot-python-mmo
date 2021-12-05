@@ -8,7 +8,6 @@ signal message_sent(message)
 
 func _ready():
 	input_field.connect("text_entered", self, "text_entered")
-	pass
 	
 func _input(event: InputEvent):
 	if event is InputEventKey and event.pressed:
@@ -18,9 +17,10 @@ func _input(event: InputEvent):
 			KEY_ESCAPE:
 				input_field.release_focus()
 
-func add_message(username: String, text: String):
-	chat_log.bbcode_text += "[%s]: %s\n" % [username, text]
+func add_message(text: String):
+	chat_log.bbcode_text += text + '\n'
 
 func text_entered(text: String):
-	input_field.text = ''
-	emit_signal("message_sent", text)
+	if len(text) > 0:
+		input_field.text = ''
+		emit_signal("message_sent", text)
