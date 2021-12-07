@@ -9,6 +9,8 @@ class Action(enum.Enum):
     Chat = enum.auto()
     Login = enum.auto()
     Register = enum.auto()
+    PVel = enum.auto()  # Player velocity
+    Pos = enum.auto()  # Position
 
 
 class Packet:
@@ -47,7 +49,15 @@ class LoginPacket(Packet):
 
 class RegisterPacket(Packet):
     def __init__(self, username: str, password: str):
-        super().__init__(Action.Registerz, username, password)
+        super().__init__(Action.Register, username, password)
+
+class PVelPacket(Packet):
+    def __init__(self, dx: float, dy: float):
+        super().__init__(Action.PVel, dx, dy)
+
+class PosPacket(Packet):
+    def __init__(self, x: float, y: float):
+        super().__init__(Action.Pos, x, y)
 
 def from_json(json_str: str) -> Packet:
     obj_dict: Dict[str, str] = json.loads(json_str)
