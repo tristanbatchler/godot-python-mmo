@@ -28,8 +28,8 @@ class MyServerProtocol(WebSocketServerProtocol):
         try:
             p: packet.Packet = packet.from_json(payload.decode('utf-8'))
             print(f"Message was a valid packet object")
-        except:
-            print(f"Could not load message as packet.")
+        except Exception as e:
+            print(f"Could not load message as packet: {e}")
             if isBinary:
                 print(f"Message was binary")
             else:
@@ -81,8 +81,9 @@ class MyServerProtocol(WebSocketServerProtocol):
                 new_message: str = f"{self.actor.get_name()} says: '{message}'"
                 self.broadcast(packet.ChatPacket(new_message))
 
-        elif p.action == packet.Action.PVel:
-            self._player_velocity = p.payloads
+        elif p.action == packet.Action.Direction:
+            dir_x, dir_y = p.payloads
+            self._player_velocity = [dir_x * 200.0, dir_y * 200.0]  # TODO: Store speed in model and send to client
             
             # If the player has stopped, send them their position so the client can
             # interpolate and sync up
@@ -108,12 +109,12 @@ class MyServerProtocol(WebSocketServerProtocol):
 
         print(f"Sent {p} to all players")
 
-    def move(self, velocity: List[float]):
+    def _update_position(self, velocity: List[float]):
         dx, dy = velocity
         self.actor.instanced_entity.x += dx / self.factory.tickrate
         self.actor.instanced_entity.y += dy / self.factory.tickrate
 
     def tick(self):
         if self._state == self.PLAY:
-            self.move(self._player_velocity)
+            self._update_position(self._player_velocity)
         

@@ -69,7 +69,7 @@ func _enter_game():
 	# Instance the world
 	_world = World.instance()
 	_player = _world.get_node("Player")
-	_player.connect("velocity_changed", self, "_send_player_velocity")
+	_player.connect("direction_changed", self, "_send_player_direction")
 	add_child(_world)
 
 	# Instance the chatbox
@@ -81,8 +81,8 @@ func send_chat(text: String) -> void:
 	var p: Packet = Packet.new("Chat", [text])
 	_network_client.send_packet(p)
 
-func _send_player_velocity(dx: float, dy: float) -> void:
-	var p: Packet = Packet.new("PVel", [dx, dy])
+func _send_player_direction(dir_x: float, dir_y: float) -> void:
+	var p: Packet = Packet.new("Direction", [dir_x, dir_y])
 	_network_client.send_packet(p)
 	print(_player.position)
 
