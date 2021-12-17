@@ -4,6 +4,7 @@ extends Node
 const NetworkClient = preload("res://websockets_client.gd")
 const Packet = preload("res://packet.gd")
 const Actor = preload("res://Actor.tscn")
+const Player = preload("res://Player.tscn")
 const Chatbox = preload("res://Chatbox.tscn")
 
 var _network_client = NetworkClient.new()
@@ -11,6 +12,7 @@ var _world
 var _chatbox
 var state: FuncRef
 var _actors: Dictionary = {}
+var _player = null
 
 onready var _login_screen = get_node("Login")
 
@@ -56,8 +58,14 @@ func _update_models(model_delta: Dictionary):
 			if model_id in _actors:
 				_actors[model_id].update(model_delta)
 			else:
-				_actors[model_id] = Actor.instance().init(model_delta)
-				add_child(_actors[model_id])
+				var a
+				if not _player:  # The first model we ever receive will be our player
+					a = Player.instance().init(model_delta)
+					a.connect("movement_input", self, "_send_player_direction")
+				else:
+					a = Actor.instance().init(model_delta)
+				_actors[model_id] = a
+				add_child(a)
 			print("Received actor data: %s" % JSON.print(model_delta))
 
 func _handle_login_button(username: String, password: String) -> void:
