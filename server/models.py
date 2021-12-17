@@ -1,4 +1,27 @@
 from django.db import models
+from django.forms import model_to_dict
+
+# TODO: This might be better as a method of each entity type - but I know inheritance is screwy here...
+def create_dict(model: models.Model) -> dict:
+    """
+    Recursively creates a dictionary based on the supplied model and all its foreign relationships.
+    """
+    d: dict = model_to_dict(model)
+    model_type: type = model.__class__
+    
+    if model_type in (Item, InstancedEntity):
+        d["entity"] = create_dict(model.entity)
+    elif model_type == Container:
+        d["instanced_entity"] = create_dict(model.instanced_entity)
+    elif model_type == ContainerItem:
+        d["item"] = create_dict(model.item)
+        d["container"] = create_dict(model.container)
+    elif model_type == Actor:
+        d["instanced_entity"] = create_dict(model.instanced_entity)
+        d["inventory"] = create_dict(model.inventory)
+        d["user"] = create_dict(model.user)
+    
+    return d
 
 
 class User(models.Model):
