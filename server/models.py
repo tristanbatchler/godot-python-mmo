@@ -7,8 +7,9 @@ def create_dict(model: models.Model) -> dict:
     Recursively creates a dictionary based on the supplied model and all its foreign relationships.
     """
     d: dict = model_to_dict(model)
-    model_type: type = model.__class__
-    
+    model_type: type = type(model)
+    d["model_type"] = model_type.__name__
+
     if model_type in (Item, InstancedEntity):
         d["entity"] = create_dict(model.entity)
     elif model_type == Container:

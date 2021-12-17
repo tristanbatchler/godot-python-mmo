@@ -3,14 +3,14 @@ extends Node
 # Imports
 const NetworkClient = preload("res://websockets_client.gd")
 const Packet = preload("res://packet.gd")
-const World = preload("res://World.tscn")
+const Actor = preload("res://Actor.tscn")
 const Chatbox = preload("res://Chatbox.tscn")
 
 var _network_client = NetworkClient.new()
 var _world
-var _player
 var _chatbox
 var state: FuncRef
+var _actors: Dictionary = {}
 
 onready var _login_screen = get_node("Login")
 
@@ -41,14 +41,24 @@ func REGISTER(p):
 		
 func PLAY(p):
 	match p.action:
+		"ModelDelta":
+			var model_delta: Dictionary = p.payloads[0]
+			_update_models(model_delta)
+
 		"Chat":
 			var message: String = p.payloads[0]
 			_chatbox.add_message(message)
 
-		"Pos":
-			var x: float = p.payloads[0]
-			var y: float = p.payloads[1]
-			_player.interpol_target = Vector2(x, y)
+func _update_models(model_delta: Dictionary):
+	var model_id: int = model_delta["id"]
+	match model_delta["model_type"]:
+		"Actor":
+			if model_id in _actors:
+				_actors[model_id].update(model_delta)
+			else:
+				_actors[model_id] = Actor.instance().init(model_delta)
+				add_child(_actors[model_id])
+			print("Received actor data: %s" % JSON.print(model_delta))
 
 func _handle_login_button(username: String, password: String) -> void:
 	state = funcref(self, "LOGIN")
@@ -66,16 +76,11 @@ func _enter_game():
 	# Remove the login screen
 	remove_child(_login_screen)
 
-	# Instance the world
-	_world = World.instance()
-	_player = _world.get_node("Player")
-	_player.connect("direction_changed", self, "_send_player_direction")
-	add_child(_world)
-
 	# Instance the chatbox
 	_chatbox = Chatbox.instance()
 	_chatbox.connect("message_sent", self, "send_chat")
 	add_child(_chatbox)
+
 
 func send_chat(text: String) -> void:
 	var p: Packet = Packet.new("Chat", [text])
@@ -84,7 +89,6 @@ func send_chat(text: String) -> void:
 func _send_player_direction(dir_x: float, dir_y: float) -> void:
 	var p: Packet = Packet.new("Direction", [dir_x, dir_y])
 	_network_client.send_packet(p)
-	print(_player.position)
 
 func _handle_client_connected() -> void:
 	print("Client connected to server!")

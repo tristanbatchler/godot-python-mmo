@@ -45,14 +45,16 @@ class MyServerProtocol(WebSocketServerProtocol):
         if p.action == packet.Action.Login:
             username, password = p.payloads
             if models.User.objects.filter(username=username, password=password).exists():
-                self.send_client(packet.OKPacket())
-                self._state = self.PLAY
-                
                 user = models.User.objects.get(username=username)
                 self.actor = models.Actor.objects.get(user=user)
                 self._player_velocity = [0.0, 0.0]
 
-                self.broadcast(packet.ChatPacket(f"{username} has joined."))
+                self.send_client(packet.OKPacket())
+                self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
+                self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has joined."))
+
+                self._state = self.PLAY
+
             else:
                 self.send_client(packet.DenyPacket())
 

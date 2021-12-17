@@ -11,6 +11,7 @@ class Action(enum.Enum):
     Register = enum.auto()
     Direction = enum.auto()  # Player movement input vector
     Pos = enum.auto()  # Player position vector
+    ModelDelta = enum.auto()
 
 
 class Packet:
@@ -58,6 +59,10 @@ class DirectionPacket(Packet):
 class PosPacket(Packet):
     def __init__(self, x: float, y: float):
         super().__init__(Action.Pos, x, y)
+
+class ModelDelta(Packet):
+    def __init__(self, model_delta: dict):
+        super().__init__(Action.ModelDelta, model_delta)
 
 def from_json(json_str: str) -> Packet:
     obj_dict: Dict[str, str] = json.loads(json_str)
