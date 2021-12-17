@@ -89,6 +89,9 @@ class MyServerProtocol(WebSocketServerProtocol):
                     self.broadcast(new_packet, exclude_self=True)
                 self.send_client(new_packet)
 
+        elif p.action == packet.Action.ModelDelta:
+            self.send_client(p)
+
         elif p.action == packet.Action.Direction:
             dir_x, dir_y = p.payloads
             self._player_velocity = [dir_x * 200.0, dir_y * 200.0]  # TODO: Store speed in model and send to client
@@ -96,7 +99,7 @@ class MyServerProtocol(WebSocketServerProtocol):
             # If the player has stopped, send them their position so the client can
             # interpolate and sync up
             if p.payloads == (0, 0):
-                self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
+                self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
