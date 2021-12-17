@@ -16,6 +16,9 @@ func update(model_delta: Dictionary):
 
 func _physics_process(delta):
 	if target:
-		velocity = (target - body.position).normalized() * speed
 		if (target - body.position).length() > 5:
-			velocity = body.move_and_slide(velocity)
+			velocity = (target - body.position) * 20
+		else:
+			target = null
+
+	velocity = body.move_and_slide(velocity)

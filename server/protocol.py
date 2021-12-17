@@ -94,11 +94,12 @@ class MyServerProtocol(WebSocketServerProtocol):
 
         elif p.action == packet.Action.Direction:
             dir_x, dir_y = p.payloads
+            old_player_velocity = self._player_velocity
             self._player_velocity = [dir_x * 200.0, dir_y * 200.0]  # TODO: Store speed in model and send to client
             
             # If the player has stopped, send them their position so the client can
             # interpolate and sync up
-            if p.payloads == (0, 0):
+            if self._player_velocity != old_player_velocity:
                 self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))
 
     def onClose(self, wasClean, code, reason):
@@ -129,3 +130,6 @@ class MyServerProtocol(WebSocketServerProtocol):
         if self._state == self.PLAY:
             self._update_position(self._player_velocity)
         
+            # Sync every 10th tick
+            if self.factory.total_ticks % 10 == 0:
+                self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))

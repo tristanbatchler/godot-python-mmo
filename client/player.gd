@@ -16,6 +16,9 @@ func get_input():
 	if Input.is_action_pressed("up"):
 		movement_direction.y -= 1
 	movement_direction = movement_direction.normalized()
+	
+	# Client side velocity for smoothness
+	velocity = movement_direction * speed
 
 	if movement_direction != old_movement_direction:
 		emit_signal("movement_input", movement_direction.x, movement_direction.y)
