@@ -96,9 +96,7 @@ class MyServerProtocol(WebSocketServerProtocol):
             # If the player has stopped, send them their position so the client can
             # interpolate and sync up
             if p.payloads == (0, 0):
-                x: float = self.actor.instanced_entity.x
-                y: float = self.actor.instanced_entity.y
-                self.send_client(packet.PosPacket(x, y))
+                self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
