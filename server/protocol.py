@@ -36,9 +36,12 @@ class MyServerProtocol(WebSocketServerProtocol):
                 print(f"Message was {payload.decode('utf8')}")
             return
 
-        self._state(p)
+        self.onPacket(self, p)
             
-    def LOGIN(self, p: packet.Packet):
+    def onPacket(self, sender: 'MyServerProtocol', p: packet.Packet):
+        self._state(sender, p)
+
+    def LOGIN(self, sender: 'MyServerProtocol', p: packet.Packet):
         if p.action == packet.Action.Login:
             username, password = p.payloads
             if models.User.objects.filter(username=username, password=password).exists():
@@ -74,12 +77,15 @@ class MyServerProtocol(WebSocketServerProtocol):
                 player.save()
                 self.send_client(packet.OKPacket())
 
-    def PLAY(self, p: packet.Packet):
+    def PLAY(self, sender: 'MyServerProtocol', p: packet.Packet):
         if p.action == packet.Action.Chat:
             message: str = p.payloads[0]
             if len(message) > 0:
-                new_message: str = f"{self.actor.get_name()} says: '{message}'"
-                self.broadcast(packet.ChatPacket(new_message))
+                new_message: str = f"{sender.actor.get_name()} says: '{message}'"
+                new_packet: packet.ChatPacket = packet.ChatPacket(new_message)
+                if sender == self:
+                    self.broadcast(new_packet, exclude_self=True)
+                self.send_client(new_packet)
 
         elif p.action == packet.Action.Direction:
             dir_x, dir_y = p.payloads
@@ -96,18 +102,20 @@ class MyServerProtocol(WebSocketServerProtocol):
         self.factory.players.remove(self)
         print(f"Websocket connection closed{' unexpectedly' if not wasClean else ' cleanly'} with code {code}: {reason}")
         if self._state == self.PLAY:
-            self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has left."))
+            self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has left."), exclude_self=True)
 
     def send_client(self, p: packet.Packet):
         b: bytes = bytes(p)
         self.sendMessage(b)
         print(f"Sent data {b}")
 
-    def broadcast(self, p: packet.Packet):
+    def broadcast(self, p: packet.Packet, exclude_self: bool = False):
         for other in self.factory.players:
-            other.send_client(p)
+            if other == self and exclude_self:
+                continue
+            other.onPacket(self, p)
 
-        print(f"Sent {p} to all players")
+        print(f"Sent {p} to all protocols")
 
     def _update_position(self, velocity: List[float]):
         dx, dy = velocity
