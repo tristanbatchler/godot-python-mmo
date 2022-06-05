@@ -52,21 +52,29 @@ func PLAY(p):
 			_chatbox.add_message(message)
 
 func _update_models(model_delta: Dictionary):
+	"""
+	Runs a function with signature 
+	`_update_x(model_id: int, model_delta: Dictionary)` where `x` is the name 
+	of a model (e.g. `_update_actor`).
+	"""
+	print("Received model data: %s" % JSON.print(model_delta))
 	var model_id: int = model_delta["id"]
-	match model_delta["model_type"]:
-		"Actor":
-			if model_id in _actors:
-				_actors[model_id].update(model_delta)
-			else:
-				var a
-				if not _player:  # The first model we ever receive will be our player
-					a = Player.instance().init(model_delta)
-					a.connect("movement_input", self, "_send_player_direction")
-				else:
-					a = Actor.instance().init(model_delta)
-				_actors[model_id] = a
-				add_child(a)
-			print("Received actor data: %s" % JSON.print(model_delta))
+	var func_name: String = "_update_" + model_delta["model_type"].to_lower()
+	var f: FuncRef = funcref(self, func_name)
+	f.call_func(model_id, model_delta)
+
+func _update_actor(model_id: int, model_delta: Dictionary):
+	if model_id in _actors:
+		_actors[model_id].update(model_delta)
+	else:
+		var a
+		if not _player:  # The first model we ever receive will be our player
+			a = Player.instance().init(model_delta)
+			a.connect("movement_input", self, "_send_player_direction")
+		else:
+			a = Actor.instance().init(model_delta)
+		_actors[model_id] = a
+		add_child(a)
 
 func _handle_login_button(username: String, password: String) -> void:
 	state = funcref(self, "LOGIN")

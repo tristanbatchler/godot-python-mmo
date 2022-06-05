@@ -6,3 +6,6 @@ export_presets.cfg
 
 __pycache__
 venv
+
+server/migrations
+client/export*
