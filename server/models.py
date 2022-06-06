@@ -24,6 +24,24 @@ def create_dict(model: models.Model) -> dict:
     
     return d
 
+def get_delta_dict(model1: dict, model2: dict):
+    ID = "id"
+    MODEL_TYPE = "model_type"
+    if ID not in model1 or ID not in model2 or MODEL_TYPE not in model1 or MODEL_TYPE not in model2:
+        raise ValueError(f"Model(s) have no ID or MODEL_TYPE attribute\nModel1: {model1}\nModel2: {model2}")
+    if model1[ID] != model2[ID] or model1[MODEL_TYPE] != model2[MODEL_TYPE]:
+        raise ValueError("Models do not have the same ID or MODEL_TYPE")
+    delta: dict = {ID: model1[ID], MODEL_TYPE: model1[MODEL_TYPE]}
+
+    for k in set(model1).intersection(set(model2)):
+        v1 = model1[k]
+        v2 = model2[k]
+        if v1 != v2:
+            delta[k] = v2
+    
+    return delta
+
+
 
 class User(models.Model):
     username = models.CharField(unique=True, max_length=20)

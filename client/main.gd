@@ -69,8 +69,10 @@ func _update_actor(model_id: int, model_delta: Dictionary):
 	else:
 		var a
 		if not _player:  # The first model we ever receive will be our player
-			a = Player.instance().init(model_delta)
-			a.connect("movement_input", self, "_send_player_direction")
+			_player = Player.instance().init(model_delta)
+			_player.connect("movement_input", self, "_send_player_direction")
+			
+			a = _player
 		else:
 			a = Actor.instance().init(model_delta)
 		_actors[model_id] = a

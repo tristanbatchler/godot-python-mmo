@@ -1,6 +1,7 @@
 # Required for importing the server app (upper dir)
 import sys
 import pathlib
+from turtle import update
 file = pathlib.Path(__file__).resolve()
 root = file.parents[1]
 sys.path.append(str(root))
@@ -12,6 +13,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 class MyServerProtocol(WebSocketServerProtocol):
     def __init__(self):
         self.actor: Optional[models.Actor] = None
+        self.actor_dict: Optional[dict] = None
         self._state: Optional[callable] = None
         self._player_velocity: List[float] = [0, 0]
         super().__init__()
@@ -47,6 +49,7 @@ class MyServerProtocol(WebSocketServerProtocol):
             if models.User.objects.filter(username=username, password=password).exists():
                 user = models.User.objects.get(username=username)
                 self.actor = models.Actor.objects.get(user=user)
+                self.actor_dict = models.create_dict(self.actor)
                 self._player_velocity = [0.0, 0.0]
 
                 self.send_client(packet.OKPacket())
@@ -100,7 +103,7 @@ class MyServerProtocol(WebSocketServerProtocol):
             # If the player has stopped, send them their position so the client can
             # interpolate and sync up
             if self._player_velocity != old_player_velocity:
-                self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))
+                self._broadcast_actor_delta_model()
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
@@ -126,10 +129,17 @@ class MyServerProtocol(WebSocketServerProtocol):
         self.actor.instanced_entity.x += dx / self.factory.tickrate
         self.actor.instanced_entity.y += dy / self.factory.tickrate
 
+    def _broadcast_actor_delta_model(self):
+        updated_actor_dict: dict = models.create_dict(self.actor)
+        delta_dict = models.get_delta_dict(self.actor_dict, updated_actor_dict)
+        if len(delta_dict) > 2:
+            self.broadcast(packet.ModelDelta(delta_dict))
+            self.actor_dict = updated_actor_dict
+
     def tick(self):
         if self._state == self.PLAY:
             self._update_position(self._player_velocity)
         
             # Sync every 10th tick
-            if self.factory.total_ticks % 10 == 0:
-                self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))
+            if self.factory.total_ticks % 5 == 0:
+                self._broadcast_actor_delta_model()

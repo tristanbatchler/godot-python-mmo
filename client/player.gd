@@ -18,7 +18,7 @@ func get_input():
 	movement_direction = movement_direction.normalized()
 	
 	# Client side velocity for smoothness
-	velocity = movement_direction * speed
+#	velocity = movement_direction * speed
 
 	if movement_direction != old_movement_direction:
 		emit_signal("movement_input", movement_direction.x, movement_direction.y)
