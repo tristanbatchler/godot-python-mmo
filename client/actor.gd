@@ -10,8 +10,8 @@ var is_player = false
 var correction_diff = Vector2.ZERO
 var correction_size_squared =  0.0
 var correction_velocity = Vector2.ZERO
-var correction_radius_moving = 50
-var correction_radius_still = 30
+var correction_radius_big = 50
+var correction_radius_small = 30
 
 	
 func update(model_delta: Dictionary):
@@ -32,20 +32,17 @@ func update(model_delta: Dictionary):
 		
 		# If the player is stopped, allow more sensitive corrections
 		if velocity.length_squared() < 100: # TODO: Magic number for detecting if player is more or less "stopped"
-			if correction_size_squared > pow(correction_radius_still, 2):
+			if correction_size_squared > pow(correction_radius_small, 2):
 				correction_velocity = correction_diff
-		# While the player is moving, only correct them if they are really off
-		else:
-			if correction_size_squared > pow(correction_radius_moving, 2):
-				correction_velocity = correction_diff
+
 
 func _physics_process(delta):
 	if is_player:
 		body.position += (velocity + correction_velocity) * delta
 		
-		# If the correction isn't very much, just rapidly stop correcting
-		if correction_size_squared <= 1000: # TODO: Magic number doesn't work if SUPER out of sync - find way to calculate this
-			correction_velocity /= 2
+		# If the player is detected to be very off, correct during physics process
+		if correction_size_squared > pow(correction_radius_big, 2):
+			correction_velocity = target - body.position
 			
 	# Non-player actors are treated differently on the screen, don't need their movement to be "smooth"
 	else:
@@ -53,6 +50,6 @@ func _physics_process(delta):
 		
 		
 	if name:
-		label.text = str(actor_name) 
+		label.text = str(actor_name) + ' : ' + str(correction_velocity)
 		
 	
