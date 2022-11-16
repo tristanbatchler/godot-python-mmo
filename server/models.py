@@ -59,11 +59,11 @@ class InstancedEntity(models.Model):
 
 
 class Container(models.Model):
-    instanced_entity = models.ForeignKey(InstancedEntity, unique=True, on_delete=models.CASCADE)
+    instanced_entity = models.OneToOneField(InstancedEntity, on_delete=models.CASCADE)
 
 
 class Item(models.Model):
-    entity = models.ForeignKey(Entity, unique=True, on_delete=models.DO_NOTHING)
+    entity = models.OneToOneField(Entity, on_delete=models.DO_NOTHING)
     price = models.FloatField()
 
 

@@ -50,6 +50,6 @@ func _physics_process(delta):
 		
 		
 	if name:
-		label.text = str(actor_name) + ' : ' + str(correction_velocity)
+		label.text = str(actor_name)
 		
 	

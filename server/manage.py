@@ -1,5 +1,4 @@
 import django.conf
-from django.db.models import IntegerField
 import sys
 import pathlib
 
@@ -12,23 +11,10 @@ INSTALLED_APPS = [
     'server'
 ]
 
-# TODO: Put this in a separate file
-cs = {
-    'database': 'Game',
-    'user': 'GameUser',
-    'password': '123',
-    'host': 'localhost',
-    'port': '5432'
-}
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': cs['database'],
-        'USER': cs['user'],
-        'PASSWORD': cs['password'],
-        'HOST': cs['host'],
-        'PORT': cs['port']
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'server/db.sqlite3'
     }
 }
 
