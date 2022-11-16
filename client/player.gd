@@ -4,6 +4,9 @@ var movement_direction = Vector2.ZERO
 
 signal movement_input(dir_x, dir_y)
 
+func _ready():
+	is_player = true
+
 func get_input():
 	var old_movement_direction = movement_direction
 	movement_direction = Vector2.ZERO
@@ -18,7 +21,7 @@ func get_input():
 	movement_direction = movement_direction.normalized()
 	
 	# Client side velocity for smoothness
-#	velocity = movement_direction * speed
+	velocity = movement_direction * 63.5
 
 	if movement_direction != old_movement_direction:
 		emit_signal("movement_input", movement_direction.x, movement_direction.y)

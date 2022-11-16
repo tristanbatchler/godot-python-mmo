@@ -1,7 +1,7 @@
 # Required for importing the server app (upper dir)
 import sys
 import pathlib
-from turtle import update
+import queue
 file = pathlib.Path(__file__).resolve()
 root = file.parents[1]
 sys.path.append(str(root))
@@ -12,6 +12,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 
 class MyServerProtocol(WebSocketServerProtocol):
     def __init__(self):
+        self.packet_queue: queue.Queue[tuple['MyServerProtocol', packet.Packet]] = queue.Queue()
         self.actor: Optional[models.Actor] = None
         self.actor_dict: Optional[dict] = None
         self._state: Optional[callable] = None
@@ -39,9 +40,9 @@ class MyServerProtocol(WebSocketServerProtocol):
             return
 
         self.onPacket(self, p)
-            
-    def onPacket(self, sender: 'MyServerProtocol', p: packet.Packet):
-        self._state(sender, p)
+
+    def onPacket(self, sender, p: packet.Packet):
+        self.packet_queue.put((sender, p))
 
     def LOGIN(self, sender: 'MyServerProtocol', p: packet.Packet):
         if p.action == packet.Action.Login:
@@ -56,7 +57,10 @@ class MyServerProtocol(WebSocketServerProtocol):
                 self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
                 self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has joined."))
 
+                self.time = None
+
                 self._state = self.PLAY
+                self.time = self.factory.total_ticks
 
             else:
                 self.send_client(packet.DenyPacket())
@@ -99,11 +103,6 @@ class MyServerProtocol(WebSocketServerProtocol):
             dir_x, dir_y = p.payloads
             old_player_velocity = self._player_velocity
             self._player_velocity = [dir_x * 200.0, dir_y * 200.0]  # TODO: Store speed in model and send to client
-            
-            # If the player has stopped, send them their position so the client can
-            # interpolate and sync up
-            if self._player_velocity != old_player_velocity:
-                self._broadcast_actor_delta_model()
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
@@ -137,9 +136,20 @@ class MyServerProtocol(WebSocketServerProtocol):
             self.actor_dict = updated_actor_dict
 
     def tick(self):
+        # Process the next packet in the queue
+        if not self.packet_queue.empty():
+            t = self.packet_queue.get()
+            print(self._state, t)
+            self._state(*t)
+
+        # Update position
         if self._state == self.PLAY:
             self._update_position(self._player_velocity)
         
-            # Sync every 10th tick
-            if self.factory.total_ticks % 5 == 0:
+            # Sync every 5 seconds 
+            now = self.factory.total_ticks
+            if (now - self.time) > 1 * self.factory.tickrate:
+                self.time = now
+
+            if self.time == now:
                 self._broadcast_actor_delta_model()
