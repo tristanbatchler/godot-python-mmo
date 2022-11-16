@@ -102,7 +102,7 @@ class MyServerProtocol(WebSocketServerProtocol):
         elif p.action == packet.Action.Direction:
             dir_x, dir_y = p.payloads
             old_player_velocity = self._player_velocity
-            self._player_velocity = [dir_x * 200.0, dir_y * 200.0]  # TODO: Store speed in model and send to client
+            self._player_velocity = [dir_x * 140, dir_y * 140]  # TODO: Store speed in model and send to client
 
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
@@ -121,19 +121,23 @@ class MyServerProtocol(WebSocketServerProtocol):
                 continue
             other.onPacket(self, p)
 
-        print(f"Sent {p} to all protocols")
+        if not(len(self.factory.players) == 1 and exclude_self):
+            print(f"Sent {p} to {len(self.factory.players) - int(exclude_self)} protocol(s)")
 
     def _update_position(self, velocity: List[float]):
         dx, dy = velocity
         self.actor.instanced_entity.x += dx / self.factory.tickrate
         self.actor.instanced_entity.y += dy / self.factory.tickrate
 
-    def _broadcast_actor_delta_model(self):
+    def _broadcast_actor_delta_model(self, exclude_self=False):
         updated_actor_dict: dict = models.create_dict(self.actor)
         delta_dict = models.get_delta_dict(self.actor_dict, updated_actor_dict)
         if len(delta_dict) > 2:
-            self.broadcast(packet.ModelDelta(delta_dict))
-            self.actor_dict = updated_actor_dict
+            self.broadcast(packet.ModelDelta(delta_dict), exclude_self=exclude_self)
+            
+            # Only say we've updated the actor if we've sent it to ourselves
+            if not exclude_self:
+                self.actor_dict = updated_actor_dict
 
     def tick(self):
         # Process the next packet in the queue
@@ -145,11 +149,20 @@ class MyServerProtocol(WebSocketServerProtocol):
         # Update position
         if self._state == self.PLAY:
             self._update_position(self._player_velocity)
+
+            # Sync with other players as much as possible
+            self._broadcast_actor_delta_model(exclude_self=True)
         
-            # Sync every 5 seconds 
+            # Sync with self every 1 second
             now = self.factory.total_ticks
             if (now - self.time) > 1 * self.factory.tickrate:
                 self.time = now
 
             if self.time == now:
-                self._broadcast_actor_delta_model()
+                updated_actor_dict: dict = models.create_dict(self.actor)
+                delta_dict = models.get_delta_dict(self.actor_dict, updated_actor_dict)
+                if len(delta_dict) > 2:
+                    p = packet.ModelDelta(delta_dict)
+                    self.onPacket(self, p)
+                    print(f"Sent {p} to just my protocol")
+                    self.actor_dict = updated_actor_dict

@@ -7,12 +7,12 @@ var target = null
 var velocity = Vector2.ZERO
 var actor_name = null
 var is_player = false
-var sync_time = 1000
-var time = OS.get_system_time_msecs()
+var correction_diff = Vector2.ZERO
+var correction_size_squared =  0.0
+var correction_velocity = Vector2.ZERO
+var correction_radius_moving = 50
+var correction_radius_still = 30
 
-func _ready():
-	if name:
-		label.text = str(actor_name) + ":" + str(velocity)
 	
 func update(model_delta: Dictionary):
 	.update(model_delta)
@@ -24,19 +24,34 @@ func update(model_delta: Dictionary):
 
 	if "entity" in ientity:
 		actor_name = model_delta["id"]
-	
-	# Update the player's velocity (delcared in player.gd)
-	if body and is_player:
-		velocity = target - body.position
 		
+	
+	if is_player and body:
+		correction_diff = target - body.position
+		correction_size_squared = correction_diff.length_squared()
+		
+		# If the player is stopped, allow more sensitive corrections
+		if velocity.length_squared() < 100: # TODO: Magic number for detecting if player is more or less "stopped"
+			if correction_size_squared > pow(correction_radius_still, 2):
+				correction_velocity = correction_diff
+		# While the player is moving, only correct them if they are really off
+		else:
+			if correction_size_squared > pow(correction_radius_moving, 2):
+				correction_velocity = correction_diff
 
 func _physics_process(delta):
 	if is_player:
-		body.position += velocity * delta
+		body.position += (velocity + correction_velocity) * delta
+		
+		# If the correction isn't very much, just rapidly stop correcting
+		if correction_size_squared <= 1000: # TODO: Magic number doesn't work if SUPER out of sync - find way to calculate this
+			correction_velocity /= 2
+			
+	# Non-player actors are treated differently on the screen, don't need their movement to be "smooth"
 	else:
-		# Other actors' positions are updated manually
 		body.position += (target - body.position) * delta
-	
+		
+		
 	if name:
 		label.text = str(actor_name) 
 		
