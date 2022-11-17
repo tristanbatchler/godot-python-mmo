@@ -21,6 +21,9 @@ class WebSocketPlayerFactory(WebSocketServerFactory):
         tickloop = task.LoopingCall(self.tick)
         tickloop.start(1 / self.tickrate)
 
+        secondloop = task.LoopingCall(self.each_second)
+        secondloop.start(1)
+
     def buildProtocol(self, addr):
         p = super().buildProtocol(addr)
         self.players.add(p)
@@ -31,6 +34,10 @@ class WebSocketPlayerFactory(WebSocketServerFactory):
             p.tick()
 
         self.total_ticks += 1
+
+    def each_second(self):
+        for p in self.players:
+            p.each_second()
 
 
 if __name__ == '__main__':

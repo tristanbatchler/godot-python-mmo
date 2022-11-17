@@ -9,6 +9,7 @@ from server import models, packet
 
 from typing import List, Optional
 from autobahn.twisted.websocket import WebSocketServerProtocol
+import time
 
 class MyServerProtocol(WebSocketServerProtocol):
     def __init__(self):
@@ -17,6 +18,7 @@ class MyServerProtocol(WebSocketServerProtocol):
         self.actor_dict: Optional[dict] = None
         self._state: Optional[callable] = None
         self._player_velocity: List[float] = [0, 0]
+        self._time_last_delta: Optional[float] = None
         super().__init__()
 
     def onConnect(self, request):
@@ -101,7 +103,6 @@ class MyServerProtocol(WebSocketServerProtocol):
 
         elif p.action == packet.Action.Direction:
             dir_x, dir_y = p.payloads
-            old_player_velocity = self._player_velocity
             self._player_velocity = [dir_x * 140, dir_y * 140]  # TODO: Store speed in model and send to client
 
     def onClose(self, wasClean, code, reason):
@@ -124,10 +125,10 @@ class MyServerProtocol(WebSocketServerProtocol):
         if not(len(self.factory.players) == 1 and exclude_self):
             print(f"Sent {p} to {len(self.factory.players) - int(exclude_self)} protocol(s)")
 
-    def _update_position(self, velocity: List[float]):
+    def _update_position(self, velocity: List[float], delta: float):
         dx, dy = velocity
-        self.actor.instanced_entity.x += dx / self.factory.tickrate
-        self.actor.instanced_entity.y += dy / self.factory.tickrate
+        self.actor.instanced_entity.x += dx * delta
+        self.actor.instanced_entity.y += dy * delta
 
     def _broadcast_actor_delta_model(self, exclude_self=False):
         updated_actor_dict: dict = models.create_dict(self.actor)
@@ -148,21 +149,20 @@ class MyServerProtocol(WebSocketServerProtocol):
 
         # Update position
         if self._state == self.PLAY:
-            self._update_position(self._player_velocity)
+            now: float = time.time()
+            if self._time_last_delta:
+                self._update_position(self._player_velocity, now - self._time_last_delta)
+            self._time_last_delta = now
 
             # Sync with other players as much as possible
             self._broadcast_actor_delta_model(exclude_self=True)
-        
-            # Sync with self every 1 second
-            now = self.factory.total_ticks
-            if (now - self.time) > 1 * self.factory.tickrate:
-                self.time = now
 
-            if self.time == now:
-                updated_actor_dict: dict = models.create_dict(self.actor)
-                delta_dict = models.get_delta_dict(self.actor_dict, updated_actor_dict)
-                if len(delta_dict) > 2:
-                    p = packet.ModelDelta(delta_dict)
-                    self.onPacket(self, p)
-                    print(f"Sent {p} to just my protocol")
-                    self.actor_dict = updated_actor_dict
+    def each_second(self):
+        if self._state == self.PLAY:
+            updated_actor_dict: dict = models.create_dict(self.actor)
+            delta_dict = models.get_delta_dict(self.actor_dict, updated_actor_dict)
+            if len(delta_dict) > 2:
+                p = packet.ModelDelta(delta_dict)
+                self.onPacket(self, p)
+                print(f"Sent {p} to just my protocol")
+                self.actor_dict = updated_actor_dict
