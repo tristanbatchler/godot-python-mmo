@@ -41,8 +41,8 @@ class DenyPacket(Packet):
         super().__init__(Action.Deny)
 
 class ChatPacket(Packet):
-    def __init__(self, message: str):
-        super().__init__(Action.Chat, message[:80])
+    def __init__(self, actor_id: str, message: str):
+        super().__init__(Action.Chat, actor_id, message[:80])
 
 class LoginPacket(Packet):
     def __init__(self, username: str, password: str):

@@ -1,7 +1,8 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://actor.gd" type="Script" id=1]
 [ext_resource path="res://tilemap_packed.png" type="Texture" id=2]
+[ext_resource path="res://Theme.tres" type="Theme" id=3]
 
 [sub_resource type="CapsuleShape2D" id=1]
 radius = 31.4286
@@ -108,7 +109,7 @@ margin_left = -50.0
 margin_top = 32.0
 margin_right = 50.0
 margin_bottom = 46.0
-text = "saltytaro"
+theme = ExtResource( 3 )
 align = 1
 clip_text = true
 __meta__ = {
@@ -125,3 +126,19 @@ anims/walk_down = SubResource( 3 )
 anims/walk_left = SubResource( 5 )
 anims/walk_right = SubResource( 4 )
 anims/walk_up = SubResource( 6 )
+
+[node name="Chat" type="Label" parent="KinematicBody2D"]
+margin_left = -268.0
+margin_top = -49.0
+margin_right = 268.0
+margin_bottom = -35.0
+theme = ExtResource( 3 )
+align = 1
+clip_text = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 5.0
+one_shot = true

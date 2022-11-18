@@ -1,10 +1,12 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://login_screen.gd" type="Script" id=1]
+[ext_resource path="res://Theme.tres" type="Theme" id=2]
 
 [node name="Login" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+theme = ExtResource( 2 )
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -22,55 +24,55 @@ __meta__ = {
 
 [node name="GridContainer" type="GridContainer" parent="VBoxContainer"]
 margin_right = 1024.0
-margin_bottom = 52.0
+margin_bottom = 72.0
 columns = 2
 
 [node name="Label_Username" type="Label" parent="VBoxContainer/GridContainer"]
 margin_top = 5.0
-margin_right = 66.0
-margin_bottom = 19.0
+margin_right = 100.0
+margin_bottom = 29.0
 text = "Username"
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="LineEdit_Username" type="LineEdit" parent="VBoxContainer/GridContainer"]
-margin_left = 70.0
+margin_left = 104.0
 margin_right = 1024.0
-margin_bottom = 24.0
+margin_bottom = 34.0
 size_flags_horizontal = 3
 
 [node name="Label_Password" type="Label" parent="VBoxContainer/GridContainer"]
-margin_top = 33.0
-margin_right = 66.0
-margin_bottom = 47.0
+margin_top = 43.0
+margin_right = 100.0
+margin_bottom = 67.0
 text = "Password"
 
 [node name="LineEdit_Password" type="LineEdit" parent="VBoxContainer/GridContainer"]
-margin_left = 70.0
-margin_top = 28.0
+margin_left = 104.0
+margin_top = 38.0
 margin_right = 1024.0
-margin_bottom = 52.0
+margin_bottom = 72.0
 size_flags_horizontal = 3
 
 [node name="CenterContainer" type="CenterContainer" parent="VBoxContainer"]
-margin_top = 56.0
+margin_top = 76.0
 margin_right = 1024.0
-margin_bottom = 76.0
+margin_bottom = 106.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/CenterContainer"]
-margin_left = 455.0
-margin_right = 569.0
-margin_bottom = 20.0
+margin_left = 425.0
+margin_right = 599.0
+margin_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="Button_Login" type="Button" parent="VBoxContainer/CenterContainer/HBoxContainer"]
-margin_right = 46.0
-margin_bottom = 20.0
+margin_right = 66.0
+margin_bottom = 30.0
 text = "Login"
 
 [node name="Button_Register" type="Button" parent="VBoxContainer/CenterContainer/HBoxContainer"]
-margin_left = 50.0
-margin_right = 114.0
-margin_bottom = 20.0
+margin_left = 70.0
+margin_right = 174.0
+margin_bottom = 30.0
 text = "Register"

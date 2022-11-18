@@ -7,6 +7,5 @@ func _ready():
 
 func _input(event):
 	if event.is_action_released("click"):
-		print("HELLO?")
 		target = body.get_global_mouse_position()
 		emit_signal("movement_input", target.x, target.y)

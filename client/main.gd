@@ -22,7 +22,7 @@ func _ready() -> void:
 	_network_client.connect("error", self, "_handle_network_error")
 	_network_client.connect("data", self, "_handle_network_data")
 	add_child(_network_client) # Begin network_client ready and process
-	_network_client.connect_to_server('3.27.41.130', 8081)
+	_network_client.connect_to_server('127.0.0.1', 8081)
 
 	_login_screen.connect("login", self, "_handle_login_button")
 	_login_screen.connect("register", self, "_handle_register_button")
@@ -48,8 +48,16 @@ func PLAY(p):
 			_update_models(model_delta)
 
 		"Chat":
-			var message: String = p.payloads[0]
-			_chatbox.add_message(message)
+			var actor_id: int = p.payloads[0]
+			var message: String = p.payloads[1]
+			
+			# -1 in packet means it comes from the server as a message
+			if actor_id > -1:
+				var actor = _actors[actor_id]
+				_chatbox.add_message(actor.actor_name + ' says: "' + message + '"')
+				actor.speak(message)
+			else:
+				_chatbox.add_message(message)
 
 func _update_models(model_delta: Dictionary):
 	"""
@@ -100,8 +108,8 @@ func _enter_game():
 	add_child(_chatbox)
 
 
-func send_chat(text: String) -> void:
-	var p: Packet = Packet.new("Chat", [text])
+func send_chat(actor_id: int, text: String) -> void:
+	var p: Packet = Packet.new("Chat", [actor_id, text])
 	_network_client.send_packet(p)
 
 func _send_player_target(t_x: float, t_y: float) -> void:

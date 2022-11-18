@@ -3,6 +3,8 @@ extends "res://model.gd"
 onready var body: KinematicBody2D = get_node("KinematicBody2D")
 onready var label: Label = get_node("KinematicBody2D/Label")
 onready var _animation_player: AnimationPlayer = get_node("KinematicBody2D/AnimationPlayer")
+onready var speechbox: Label = get_node("KinematicBody2D/Chat")
+onready var _speech_timer: Timer = get_node("Timer")
 
 
 var target = null
@@ -13,6 +15,7 @@ var correction_size_squared =  0.0
 var correction_radius = 50
 var velocity = Vector2.ZERO
 var actor_name = ""
+var direction_angle: float = 0
 
 	
 func update(model_delta: Dictionary):
@@ -22,20 +25,23 @@ func update(model_delta: Dictionary):
 	server_target = Vector2(float(ientity["x"]), float(ientity["y"]))
 	actor_name = ientity["entity"]["name"]
 	
+	if label:
+		label.text = actor_name
+	
 	print("Set ", str(model_delta["id"]),  "'s target to: ", server_target)
 	
 	if is_player and body:
 		correction_diff = server_target - body.position
 		correction_size_squared = correction_diff.length_squared()
 
+func speak(message: String):
+	self.speechbox.text = message
+	_speech_timer.start()
 
 func _physics_process(delta):
-	var direction = 0
-	
 	if is_player and target:
-		if target:
-			direction = target.angle_to_point(body.position)
-			velocity = body.position.direction_to(target) * 70
+		direction_angle = target.angle_to_point(body.position)
+		velocity = body.position.direction_to(target) * 70
 			
 		if correction_size_squared > correction_radius:
 			body.position = server_target
@@ -45,7 +51,7 @@ func _physics_process(delta):
 			velocity = Vector2.ZERO
 	
 	elif server_target:
-			direction = server_target.angle_to_point(body.position)
+			direction_angle = server_target.angle_to_point(body.position)
 			velocity = body.position.direction_to(server_target) * 70
 			
 			if body.position.distance_squared_to(server_target) <= 25:
@@ -53,19 +59,20 @@ func _physics_process(delta):
 	
 		
 	velocity = body.move_and_slide(velocity)
-	
+		
+func _process(delta):
 	if velocity.length_squared() <= 25:
 		_animation_player.stop()
 	else:
-		if (-PI/4 <= direction and direction < 0) or (0 <= direction and direction < PI/4):
+		if (-PI/4 <= direction_angle and direction_angle < 0) or (0 <= direction_angle and direction_angle < PI/4):
 			_animation_player.play("walk_right")
-		elif -3*PI/4 <= direction and direction < -PI/4:
+		elif -3*PI/4 <= direction_angle and direction_angle < -PI/4:
 			_animation_player.play("walk_up")
-		elif PI/4 <= direction and direction < 3*PI/4:
+		elif PI/4 <= direction_angle and direction_angle < 3*PI/4:
 			_animation_player.play("walk_down")
 		else:
 			_animation_player.play("walk_left")
-	
-	label.text = actor_name
-		
+			
+	if _speech_timer.is_stopped():
+		self.speechbox.text = ""
 	

@@ -58,7 +58,7 @@ class MyServerProtocol(WebSocketServerProtocol):
 
                 self.send_client(packet.OKPacket())
                 self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
-                self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has joined."))
+                self.broadcast(packet.ChatPacket(-1, f"{self.actor.get_name()} has joined."))
 
                 self.time = None
 
@@ -91,10 +91,14 @@ class MyServerProtocol(WebSocketServerProtocol):
 
     def PLAY(self, sender: 'MyServerProtocol', p: packet.Packet):
         if p.action == packet.Action.Chat:
-            message: str = p.payloads[0]
+            actor_id: int = p.payloads[0]
+            message: str = p.payloads[1]
+
+            new_packet: packet.ChatPacket = p
+            if actor_id == -2:
+                new_packet = packet.ChatPacket(self.actor.id, message)
+
             if len(message) > 0:
-                new_message: str = f"{sender.actor.get_name()} says: '{message}'"
-                new_packet: packet.ChatPacket = packet.ChatPacket(new_message)
                 if sender == self:
                     self.broadcast(new_packet, exclude_self=True)
                 self.send_client(new_packet)
@@ -110,7 +114,7 @@ class MyServerProtocol(WebSocketServerProtocol):
         self.factory.players.remove(self)
         print(f"Websocket connection closed{' unexpectedly' if not wasClean else ' cleanly'} with code {code}: {reason}")
         if self._state == self.PLAY:
-            self.broadcast(packet.ChatPacket(f"{self.actor.get_name()} has left."), exclude_self=True)
+            self.broadcast(packet.ChatPacket(-1, f"{self.actor.get_name()} has left."), exclude_self=True)
 
     def send_client(self, p: packet.Packet):
         b: bytes = bytes(p)

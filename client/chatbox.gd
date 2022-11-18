@@ -23,4 +23,6 @@ func add_message(text: String):
 func text_entered(text: String):
 	if len(text) > 0:
 		input_field.text = ''
-		emit_signal("message_sent", text)
+		
+		# -2 means it came from the client
+		emit_signal("message_sent", -2, text)
