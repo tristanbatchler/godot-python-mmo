@@ -9,7 +9,7 @@ class Action(enum.Enum):
     Chat = enum.auto()
     Login = enum.auto()
     Register = enum.auto()
-    Direction = enum.auto()  # Player movement input vector
+    Target = enum.auto()  # Player target input vector
     Pos = enum.auto()  # Player position vector
     ModelDelta = enum.auto()
 
@@ -52,9 +52,9 @@ class RegisterPacket(Packet):
     def __init__(self, username: str, password: str):
         super().__init__(Action.Register, username, password)
 
-class DirectionPacket(Packet):
-    def __init__(self, dir_x: float, dir_y: float):
-        super().__init__(Action.Direction, dir_x, dir_y)
+class TargetPacket(Packet):
+    def __init__(self, t_x: float, t_y: float):
+        super().__init__(Action.Target, t_x, t_y)
 
 class PosPacket(Packet):
     def __init__(self, x: float, y: float):

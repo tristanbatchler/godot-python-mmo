@@ -70,7 +70,7 @@ func _update_actor(model_id: int, model_delta: Dictionary):
 		var a
 		if not _player:  # The first model we ever receive will be our player
 			_player = Player.instance().init(model_delta)
-			_player.connect("movement_input", self, "_send_player_direction")
+			_player.connect("movement_input", self, "_send_player_target")
 			
 			a = _player
 		else:
@@ -104,8 +104,8 @@ func send_chat(text: String) -> void:
 	var p: Packet = Packet.new("Chat", [text])
 	_network_client.send_packet(p)
 
-func _send_player_direction(dir_x: float, dir_y: float) -> void:
-	var p: Packet = Packet.new("Direction", [dir_x, dir_y])
+func _send_player_target(t_x: float, t_y: float) -> void:
+	var p: Packet = Packet.new("Target", [t_x, t_y])
 	_network_client.send_packet(p)
 
 func _handle_client_connected() -> void:

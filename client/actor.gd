@@ -4,53 +4,43 @@ onready var body: KinematicBody2D = get_node("KinematicBody2D")
 onready var label: Label = get_node("KinematicBody2D/Label")
 
 var target = null
-var velocity = Vector2.ZERO
-var actor_name = null
+var server_target = null
 var is_player = false
 var correction_diff = Vector2.ZERO
 var correction_size_squared =  0.0
-var correction_velocity = Vector2.ZERO
-var correction_radius_big = 50
-var correction_radius_small = 30
+var correction_radius = 50
+var velocity = Vector2.ZERO
+var actor_name = ""
 
 	
 func update(model_delta: Dictionary):
 	.update(model_delta)
 	
 	var ientity = model_delta["instanced_entity"]
-	target = Vector2(float(ientity["x"]), float(ientity["y"]))
+	server_target = Vector2(float(ientity["x"]), float(ientity["y"]))
+	actor_name = ientity["entity"]["name"]
 	
-	print("Set ", str(model_delta["id"]),  "'s target to: ", target)
-
-	if "entity" in ientity:
-		actor_name = model_delta["id"]
-		
+	print("Set ", str(model_delta["id"]),  "'s target to: ", server_target)
 	
 	if is_player and body:
-		correction_diff = target - body.position
+		correction_diff = server_target - body.position
 		correction_size_squared = correction_diff.length_squared()
-		
-		# If the player is stopped, allow more sensitive corrections
-		if velocity.length_squared() < 100: # TODO: Magic number for detecting if player is more or less "stopped"
-			if correction_size_squared > pow(correction_radius_small, 2):
-				body.position = target
 
 
 func _physics_process(delta):
 	if is_player:
-		body.position += velocity * delta
-		
-		# If the player is detected to be very off, correct during physics process
-		if correction_size_squared > pow(correction_radius_big, 2):
-			body.position = target
-			correction_size_squared = 0
+		if target and body.position.distance_squared_to(target) > 25:
+			velocity = body.position.direction_to(target) * 70
+			velocity = body.move_and_slide(velocity)
 			
-	# Non-player actors are treated differently on the screen, don't need their movement to be "smooth"
-	else:
-		body.position += (target - body.position) * delta
-		
-		
-	if name:
-		label.text = str(actor_name)
+		if correction_size_squared > correction_radius:
+			body.position = server_target
+			correction_size_squared = 0
+	
+	elif server_target and body.position.distance_squared_to(server_target) > 25:
+			velocity = body.position.direction_to(server_target) * 70
+			velocity = body.move_and_slide(velocity)
+	
+	label.text = actor_name
 		
 	
