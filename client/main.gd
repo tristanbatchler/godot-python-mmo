@@ -22,7 +22,7 @@ func _ready() -> void:
 	_network_client.connect("error", self, "_handle_network_error")
 	_network_client.connect("data", self, "_handle_network_data")
 	add_child(_network_client) # Begin network_client ready and process
-	_network_client.connect_to_server('127.0.0.1', 8081)
+	_network_client.connect_to_server('3.27.41.130', 8081)
 
 	_login_screen.connect("login", self, "_handle_login_button")
 	_login_screen.connect("register", self, "_handle_register_button")
