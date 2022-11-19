@@ -20,7 +20,7 @@ def create_dict(model: models.Model) -> dict:
     elif model_type == Actor:
         d["instanced_entity"] = create_dict(model.instanced_entity)
         d["inventory"] = create_dict(model.inventory)
-        d["user"] = create_dict(model.user)
+        # Purposefully don't include user information here.
     
     return d
 

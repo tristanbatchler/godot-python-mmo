@@ -102,11 +102,14 @@ class MyServerProtocol(WebSocketServerProtocol):
                 self.send_client(new_packet)
 
         elif p.action == packet.Action.ModelDelta:
-            actor_id: int = p.payloads[0]["id"]
-            # Request the full model if not met before
+            actor_id: int = sender.actor.id
+            # Request the full model if not met before and send our full model
             if actor_id not in self._known_others:
                 self._known_others.add(actor_id)
                 sender.onPacket(self, packet.RequestFullModelPacket())
+
+                # Send the new person a full copy of our model too
+                sender.onPacket(self, packet.ModelDelta(models.create_dict(self.actor)))
 
             self.send_client(p)
 

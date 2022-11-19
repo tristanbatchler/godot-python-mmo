@@ -18,6 +18,7 @@ var velocity = Vector2.ZERO
 var actor_name = ""
 var direction_angle: float = 0
 var avatar_id: int = 0
+var initial_position_set: bool = false
 
 	
 func update(model_delta: Dictionary):
@@ -38,6 +39,10 @@ func update(model_delta: Dictionary):
 	if is_player and body:
 		correction_diff = server_target - body.position
 		correction_size_squared = correction_diff.length_squared()
+		
+	if body and not initial_position_set:
+		body.position = server_target
+		initial_position_set = true
 
 func speak(message: String):
 	self.speechbox.text = message
@@ -62,8 +67,7 @@ func _physics_process(delta):
 			if body.position.distance_squared_to(server_target) <= 25:
 				velocity = Vector2.ZERO
 	
-		
-	velocity = body.move_and_slide(velocity)
+	body.position += velocity * delta
 		
 func _process(delta):
 	if velocity.length_squared() <= 25:
@@ -83,6 +87,3 @@ func _process(delta):
 		
 	if _sprite:
 		_sprite.set_region_rect(Rect2(Vector2(369, avatar_id * 48 + 1), Vector2(63, 47)))
-	
-	if label:
-		label.text = str(avatar_id)
