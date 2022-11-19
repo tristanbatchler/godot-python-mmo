@@ -120,11 +120,14 @@ class MyServerProtocol(WebSocketServerProtocol):
             t_x, t_y = p.payloads
             self._player_target = [t_x, t_y]
 
+        elif p.action == packet.Action.Disconnect:
+            self.send_client(p)
+
     def onClose(self, wasClean, code, reason):
         self.factory.players.remove(self)
         print(f"Websocket connection closed{' unexpectedly' if not wasClean else ' cleanly'} with code {code}: {reason}")
         if self._state == self.PLAY:
-            self.broadcast(packet.ChatPacket(-1, f"{self.actor.get_name()} has left."), exclude_self=True)
+            self.broadcast(packet.DisconnectPacket(self.actor.id), exclude_self=True)
 
     def send_client(self, p: packet.Packet):
         b: bytes = bytes(p)

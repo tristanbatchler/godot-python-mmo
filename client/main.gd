@@ -58,6 +58,14 @@ func PLAY(p):
 				actor.speak(message)
 			else:
 				_chatbox.add_message(message)
+				
+		"Disconnect":
+			var actor_id: int = p.payloads[0]
+			
+			var actor = _actors[actor_id]
+			_chatbox.add_message(actor.actor_name + ' has disconnected.')
+			self._actors.erase(actor_id)
+			remove_child(actor)
 
 func _update_models(model_delta: Dictionary):
 	"""

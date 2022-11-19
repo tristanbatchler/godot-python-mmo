@@ -13,6 +13,7 @@ class Action(enum.Enum):
     Pos = enum.auto()  # Player position vector
     ModelDelta = enum.auto()
     RequestFullModel = enum.auto()
+    Disconnect = enum.auto()
 
 
 class Packet:
@@ -68,6 +69,10 @@ class ModelDelta(Packet):
 class RequestFullModelPacket(Packet):
     def __init__(self):
         super().__init__(Action.RequestFullModel)
+
+class DisconnectPacket(Packet):
+    def __init__(self, actor_id: int):
+        super().__init__(Action.Disconnect, actor_id)
 
 def from_json(json_str: str) -> Packet:
     obj_dict: Dict[str, str] = json.loads(json_str)
