@@ -12,6 +12,7 @@ class Action(enum.Enum):
     Target = enum.auto()  # Player target input vector
     Pos = enum.auto()  # Player position vector
     ModelDelta = enum.auto()
+    RequestFullModel = enum.auto()
 
 
 class Packet:
@@ -63,6 +64,10 @@ class PosPacket(Packet):
 class ModelDelta(Packet):
     def __init__(self, model_delta: dict):
         super().__init__(Action.ModelDelta, model_delta)
+
+class RequestFullModelPacket(Packet):
+    def __init__(self):
+        super().__init__(Action.RequestFullModel)
 
 def from_json(json_str: str) -> Packet:
     obj_dict: Dict[str, str] = json.loads(json_str)

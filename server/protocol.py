@@ -20,6 +20,7 @@ class MyServerProtocol(WebSocketServerProtocol):
         self._state: Optional[callable] = None
         self._player_target: Optional[List[float]] = None
         self._time_last_delta: Optional[float] = None
+        self._known_others: set = set()
         super().__init__()
 
     def onConnect(self, request):
@@ -57,13 +58,10 @@ class MyServerProtocol(WebSocketServerProtocol):
                 self._player_target = [self.actor.instanced_entity.x, self.actor.instanced_entity.y]
 
                 self.send_client(packet.OKPacket())
-                self.send_client(packet.ModelDelta(models.create_dict(self.actor)))
+                self.broadcast(packet.ModelDelta(models.create_dict(self.actor)))
                 self.broadcast(packet.ChatPacket(-1, f"{self.actor.get_name()} has joined."))
 
-                self.time = None
-
                 self._state = self.PLAY
-                self.time = self.factory.total_ticks
 
             else:
                 self.send_client(packet.DenyPacket())
@@ -104,7 +102,16 @@ class MyServerProtocol(WebSocketServerProtocol):
                 self.send_client(new_packet)
 
         elif p.action == packet.Action.ModelDelta:
+            actor_id: int = p.payloads[0]["id"]
+            # Request the full model if not met before
+            if actor_id not in self._known_others:
+                self._known_others.add(actor_id)
+                sender.onPacket(self, packet.RequestFullModelPacket())
+
             self.send_client(p)
+
+        elif p.action == packet.Action.RequestFullModel:
+            sender.onPacket(self, packet.ModelDelta(models.create_dict(self.actor)))
 
         elif p.action == packet.Action.Target:
             t_x, t_y = p.payloads

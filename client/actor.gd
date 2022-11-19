@@ -18,7 +18,6 @@ var velocity = Vector2.ZERO
 var actor_name = ""
 var direction_angle: float = 0
 var avatar_id: int = 0
-var avatar_set: bool = false
 
 	
 func update(model_delta: Dictionary):
@@ -82,7 +81,8 @@ func _process(delta):
 	if _speech_timer.is_stopped():
 		self.speechbox.text = ""
 		
-	if _sprite and not avatar_set:
+	if _sprite:
 		_sprite.set_region_rect(Rect2(Vector2(369, avatar_id * 48 + 1), Vector2(63, 47)))
-		avatar_set = true
 	
+	if label:
+		label.text = str(avatar_id)

@@ -1,6 +1,7 @@
 # Required for importing the server app (upper dir)
 import sys
 import pathlib
+import packet
 file = pathlib.Path(__file__).resolve()
 root = file.parents[1]
 sys.path.append(str(root))
