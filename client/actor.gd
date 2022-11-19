@@ -3,7 +3,7 @@ extends "res://model.gd"
 onready var body: KinematicBody2D = get_node("KinematicBody2D")
 onready var label: Label = get_node("KinematicBody2D/Label")
 onready var _sprite: Sprite = get_node("KinematicBody2D/Sprite")
-onready var _animation_player: AnimationPlayer = get_node("KinematicBody2D/AnimationPlayer")
+onready var _animation_player: AnimationPlayer = get_node("KinematicBody2D/Sprite/AnimationPlayer")
 onready var speechbox: Label = get_node("KinematicBody2D/Chat")
 onready var _speech_timer: Timer = get_node("Timer")
 

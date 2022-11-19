@@ -129,6 +129,8 @@ text = "OK"
 
 [node name="Sprite" parent="Popup/VBoxContainer/HBoxContainer" instance=ExtResource( 3 )]
 position = Vector2( 115, -56 )
+scale = Vector2( -4, 4 )
+frame = 0
 
 [node name="RightButton" type="Button" parent="Popup/VBoxContainer/HBoxContainer"]
 margin_left = 152.0
@@ -136,3 +138,7 @@ margin_right = 225.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 text = ">"
+
+[node name="Timer" type="Timer" parent="."]
+one_shot = true
+autostart = true
