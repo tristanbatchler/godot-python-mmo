@@ -7,7 +7,7 @@ onready var register_button: Button = get_node("VBoxContainer/CenterContainer/HB
 
 
 signal login(username, password)
-signal register(username, password)
+signal register(username, password, avatar_id)
 
 func _ready():
 	password_field.secret = true
@@ -18,4 +18,5 @@ func _login() -> void:
 	emit_signal("login", username_field.text, password_field.text)
 
 func _register() -> void:
-	emit_signal("register", username_field.text, password_field.text)
+	var avatar_id = 0
+	emit_signal("register", username_field.text, password_field.text, avatar_id)

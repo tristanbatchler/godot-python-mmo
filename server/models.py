@@ -77,6 +77,7 @@ class Actor(models.Model):
     instanced_entity = models.ForeignKey(InstancedEntity, unique=True, on_delete=models.CASCADE)
     inventory = models.ForeignKey(Container, unique=True, on_delete=models.CASCADE)
     user = models.ForeignKey(User, unique=True, null=True, default=None, on_delete=models.DO_NOTHING)
+    avatar_id = models.IntegerField()
     # TODO: Add speed
 
     def get_name(self):

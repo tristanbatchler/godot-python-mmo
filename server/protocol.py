@@ -69,7 +69,7 @@ class MyServerProtocol(WebSocketServerProtocol):
                 self.send_client(packet.DenyPacket())
 
         elif p.action == packet.Action.Register:
-            username, password = p.payloads
+            username, password, avatar_id = p.payloads
             if models.User.objects.filter(username=username).exists():
                 self.send_client(packet.DenyPacket())
             else:
@@ -85,7 +85,7 @@ class MyServerProtocol(WebSocketServerProtocol):
                 inventory_ientity.save()
                 inventory_container = models.Container(instanced_entity=inventory_ientity)
                 inventory_container.save()
-                player = models.Actor(instanced_entity=player_ientity, inventory=inventory_container, user=user)
+                player = models.Actor(instanced_entity=player_ientity, inventory=inventory_container, user=user, avatar_id=avatar_id)
                 player.save()
                 self.send_client(packet.OKPacket())
 

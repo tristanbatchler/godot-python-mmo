@@ -2,6 +2,7 @@ extends "res://model.gd"
 
 onready var body: KinematicBody2D = get_node("KinematicBody2D")
 onready var label: Label = get_node("KinematicBody2D/Label")
+onready var _sprite: Sprite = get_node("KinematicBody2D/Sprite")
 onready var _animation_player: AnimationPlayer = get_node("KinematicBody2D/AnimationPlayer")
 onready var speechbox: Label = get_node("KinematicBody2D/Chat")
 onready var _speech_timer: Timer = get_node("Timer")
@@ -16,6 +17,8 @@ var correction_radius = 50
 var velocity = Vector2.ZERO
 var actor_name = ""
 var direction_angle: float = 0
+var avatar_id: int = 0
+var avatar_set: bool = false
 
 	
 func update(model_delta: Dictionary):
@@ -24,6 +27,9 @@ func update(model_delta: Dictionary):
 	var ientity = model_delta["instanced_entity"]
 	server_target = Vector2(float(ientity["x"]), float(ientity["y"]))
 	actor_name = ientity["entity"]["name"]
+	
+	if "avatar_id" in model_delta:
+		avatar_id = model_delta["avatar_id"]
 	
 	if label:
 		label.text = actor_name
@@ -75,4 +81,8 @@ func _process(delta):
 			
 	if _speech_timer.is_stopped():
 		self.speechbox.text = ""
+		
+	if _sprite and not avatar_set:
+		_sprite.set_region_rect(Rect2(Vector2(369, avatar_id * 48 + 1), Vector2(63, 47)))
+		avatar_set = true
 	
