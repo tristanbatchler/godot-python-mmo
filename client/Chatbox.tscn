@@ -16,21 +16,25 @@ __meta__ = {
 anchor_top = 0.739
 anchor_right = 1.0
 anchor_bottom = 1.0
+margin_left = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
 [node name="RichTextLabel" type="RichTextLabel" parent="VBoxContainer"]
-margin_right = 1024.0
-margin_bottom = 122.0
+margin_right = 1004.0
+margin_bottom = 112.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = ExtResource( 3 )
+scroll_following = true
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 126.0
-margin_right = 1024.0
-margin_bottom = 156.0
+margin_top = 116.0
+margin_right = 1004.0
+margin_bottom = 146.0
 size_flags_horizontal = 3
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
@@ -42,7 +46,7 @@ text = "[Say]:"
 
 [node name="LineEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
 margin_left = 47.0
-margin_right = 1024.0
+margin_right = 1004.0
 margin_bottom = 30.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
