@@ -34,7 +34,7 @@ func update(model_delta: Dictionary):
 	if label:
 		label.text = actor_name
 	
-	print("Set ", str(model_delta["id"]),  "'s target to: ", server_target)
+#	print("Set ", str(model_delta["id"]),  "'s target to: ", server_target)
 	
 	if is_player and body:
 		correction_diff = server_target - body.position

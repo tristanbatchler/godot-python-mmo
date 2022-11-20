@@ -132,7 +132,7 @@ func _handle_client_disconnected(was_clean: bool) -> void:
 	get_tree().quit()
 
 func _handle_network_data(data: String) -> void:
-	print("Received server data: ", data)
+#	print("Received server data: ", data)
 	var action_payloads: Array = Packet.json_to_action_payloads(data)
 	var p: Packet = Packet.new(action_payloads[0], action_payloads[1])
 	# Pass the packet to our current state
