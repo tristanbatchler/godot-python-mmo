@@ -46,6 +46,10 @@ click={
  ]
 }
 
+[network]
+
+ssl/certificates="res://server.crt"
+
 [physics]
 
 common/enable_pause_aware_picking=true

@@ -1,8 +1,8 @@
 extends Control
 
-onready var chat_log = get_node("VBoxContainer/RichTextLabel")
-onready var input_label = get_node("VBoxContainer/HBoxContainer/Label")
-onready var input_field = get_node("VBoxContainer/HBoxContainer/LineEdit")
+onready var chat_log = get_node("CanvasLayer/VBoxContainer/RichTextLabel")
+onready var input_label = get_node("CanvasLayer/VBoxContainer/HBoxContainer/Label")
+onready var input_field = get_node("CanvasLayer/VBoxContainer/HBoxContainer/LineEdit")
 
 signal message_sent(message)
 

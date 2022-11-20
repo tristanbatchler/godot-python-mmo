@@ -10,3 +10,4 @@ venv
 server/migrations
 client/export*
 server/db.sqlite3
+server/keys/server.key
