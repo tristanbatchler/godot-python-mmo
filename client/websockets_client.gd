@@ -9,7 +9,7 @@ signal error
 
 # Our WebSocketClient instance
 var _client = WebSocketClient.new()
-var _server_cert = load("res://server.crt")
+var _cert = X509Certificate.new()
 
 func _ready():
 	_client.connect("connection_closed", self, "_closed")
@@ -18,7 +18,8 @@ func _ready():
 	_client.connect("data_received", self, "_on_data")
 	
 	_client.verify_ssl = false
-	_client.trusted_ssl_certificate = _server_cert
+	_cert.load("res://server.crt")
+	_client.trusted_ssl_certificate = _cert
 
 func connect_to_server(hostname: String, port: int) -> void:
 	# Connects to the server or emits an error signal. 
