@@ -19,13 +19,13 @@ class WebSocketPlayerFactory(WebSocketServerFactory):
         self.players: set[protocol.MyServerProtocol] = set()
 
         # set up game tick
-        self.tickrate = 20      # hertz (ticks per second)
+        self.tickrate = 10      # hertz (ticks per second)
         self.total_ticks = 0
         tickloop = task.LoopingCall(self.tick)
         tickloop.start(1 / self.tickrate)
 
         secondloop = task.LoopingCall(self.each_second)
-        secondloop.start(1)
+        secondloop.start(self.tickrate)
 
     def buildProtocol(self, addr):
         p = super().buildProtocol(addr)
