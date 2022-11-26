@@ -25,7 +25,7 @@ class WebSocketPlayerFactory(WebSocketServerFactory):
         tickloop.start(1 / self.tickrate)
 
         secondloop = task.LoopingCall(self.each_second)
-        secondloop.start(self.tickrate)
+#        secondloop.start(1/self.tickrate)
 
     def buildProtocol(self, addr):
         p = super().buildProtocol(addr)

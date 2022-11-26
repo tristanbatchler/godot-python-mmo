@@ -164,10 +164,13 @@ class MyServerProtocol(WebSocketServerProtocol):
 
     def _update_position(self, target: List[float], delta: float):
         pos = [self.actor.instanced_entity.x, self.actor.instanced_entity.y]
-        if self._distance_squared_to(pos, target) > 25:
+        if self._distance_squared_to(pos, target) > 625:
             d_x, d_y = self._direction_to(pos, target)
             self.actor.instanced_entity.x += d_x * 70 * delta
             self.actor.instanced_entity.y += d_y * 70 * delta
+            return True
+        else:
+            return False
 
     def _broadcast_actor_delta_model(self):
         updated_actor_dict: dict = models.create_dict(self.actor)
@@ -184,10 +187,11 @@ class MyServerProtocol(WebSocketServerProtocol):
             self._state(*t)
 
         # Update position
-        if self._state == self.PLAY:
+        elif self._state == self.PLAY:
             now: float = time.time()
             if self._time_last_delta:
-                self._update_position(self._player_target, now - self._time_last_delta)
+                if self._update_position(self._player_target, now - self._time_last_delta):
+                    self._broadcast_actor_delta_model()
             self._time_last_delta = now
 
     def each_second(self):

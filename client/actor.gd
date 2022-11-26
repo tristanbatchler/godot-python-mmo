@@ -13,7 +13,7 @@ var server_target = null
 var is_player = false
 var correction_diff = Vector2.ZERO
 var correction_size_squared =  0.0
-var correction_radius = 50
+var correction_radius = 100
 var velocity = Vector2.ZERO
 var actor_name = ""
 var direction_angle: float = 0
@@ -53,7 +53,7 @@ func _physics_process(delta):
 		direction_angle = target.angle_to_point(body.position)
 		velocity = body.position.direction_to(target) * 70
 			
-		if correction_size_squared > correction_radius:
+		if correction_size_squared > pow(correction_radius, 2):
 			body.position = server_target
 			correction_size_squared = 0
 			

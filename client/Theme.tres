@@ -4,5 +4,5 @@
 
 [resource]
 default_font = ExtResource( 1 )
-Button/fonts/font = null
+Button/fonts/font = ExtResource( 1 )
 Button/styles/disabled = null
