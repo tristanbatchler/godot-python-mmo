@@ -46,7 +46,7 @@ func _connected(proto = ""):
 
 func _on_data():
 	var data: String = _client.get_peer(1).get_packet().get_string_from_utf8()
-	print("Got data from server: ", data)
+#	print("Got data from server: ", data)
 	emit_signal("data", data)
 
 func _process(delta):

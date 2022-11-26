@@ -48,8 +48,14 @@ text = "[Say]:"
 
 [node name="LineEdit" type="LineEdit" parent="CanvasLayer/VBoxContainer/HBoxContainer"]
 margin_left = 47.0
-margin_right = 1004.0
+margin_right = 957.0
 margin_bottom = 30.0
 size_flags_horizontal = 3
 theme = ExtResource( 3 )
 max_length = 80
+
+[node name="Button" type="Button" parent="CanvasLayer/VBoxContainer/HBoxContainer"]
+margin_left = 961.0
+margin_right = 1004.0
+margin_bottom = 30.0
+text = "Send"
