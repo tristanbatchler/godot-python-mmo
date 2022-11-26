@@ -183,8 +183,10 @@ class MyServerProtocol(WebSocketServerProtocol):
         # Process the next packet in the queue
         if not self.packet_queue.empty():
             t = self.packet_queue.get()
-            print(self._state, t)
-            self._state(*t)
+            try:
+                self._state(*t)
+            except:
+                pass
 
         # Update position
         elif self._state == self.PLAY:
